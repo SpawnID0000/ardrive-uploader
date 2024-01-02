@@ -3,6 +3,7 @@ import subprocess
 import json
 import sys
 import csv
+import time
 
 # User-editable section
 parent_folder_id = 'ca6cc8b9-f663-4422-a204-c2a63daed34c'
@@ -50,7 +51,7 @@ def upload_file_to_ardrive(local_path, parent_folder_id, dest_file_name, log_wri
     command = [
         'ardrive', 'upload-file', '--local-path', local_path, '-F', parent_folder_id, '-d', dest_file_name, '-w', wallet_file, '--upsert', '--turbo'
     ]
-    for attempt in range(5):
+    for attempt in range(10):
         print(f"Executing command: {' '.join(command)}")  # Print the command
         result = subprocess.run(command, capture_output=True, text=True)
         if result.returncode == 0:
@@ -60,8 +61,9 @@ def upload_file_to_ardrive(local_path, parent_folder_id, dest_file_name, log_wri
             return
         else:
             print(f"Attempt {attempt+1} failed: {result.stderr}")
+            time.sleep(500)
     log_writer.writerow(['Failed', dest_file_name, parent_folder_id])
-    sys.exit(f"Failed to upload {dest_file_name} after 5 attempts.")
+    sys.exit(f"Failed to upload {dest_file_name} after 10 attempts.")
 
 def process_folder(folder_path, parent_folder_id, log_writer):
     folder_name = os.path.basename(folder_path)
